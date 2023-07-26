@@ -77,41 +77,40 @@ class ParsingState:
         entered_code_lines = False
         exited_code_lines = False
         created_code_change = False
-        match self.cur_line.rstrip("\n"):
-            case _BlockIndicator.Start.value:
-                assert not self.in_special_lines and not self.in_code_lines
-                self.in_special_lines = True
-            case _BlockIndicator.Code.value:
-                assert self.in_special_lines and not self.in_code_lines
-                self.in_code_lines = True
+        if(self.cur_line.rstrip("\n") == _BlockIndicator.Start.value):
+            assert not self.in_special_lines and not self.in_code_lines
+            self.in_special_lines = True
+        elif(self.cur_line.rstrip("\n") == _BlockIndicator.Code.value):
+            assert self.in_special_lines and not self.in_code_lines
+            self.in_code_lines = True
+            self.create_code_change(code_file_manager)
+            entered_code_lines = True
+            created_code_change = True
+        elif(self.cur_line.rstrip("\n") == _BlockIndicator.End.value):
+            assert self.in_special_lines
+            if not self.in_code_lines:
                 self.create_code_change(code_file_manager)
-                entered_code_lines = True
                 created_code_change = True
-            case _BlockIndicator.End.value:
-                assert self.in_special_lines
-                if not self.in_code_lines:
-                    self.create_code_change(code_file_manager)
-                    created_code_change = True
-                else:
-                    self.code_changes[-1].code_lines = self.code_lines
-                    self.code_lines = []
-                    exited_code_lines = True
-                self.in_special_lines, self.in_code_lines = False, False
-            case _:
-                if self.in_code_lines:
-                    self.code_lines.append(self.cur_line.rstrip("\n"))
-                elif self.in_special_lines:
-                    self.json_lines.append(self.cur_line)
-                elif not self.cur_printed:
-                    self.explanation += self.cur_line
-                    if self.cur_line:
-                        self.explained_since_change = True
+            else:
+                self.code_changes[-1].code_lines = self.code_lines
+                self.code_lines = []
+                exited_code_lines = True
+            self.in_special_lines, self.in_code_lines = False, False
+        else:
+            if self.in_code_lines:
+                self.code_lines.append(self.cur_line.rstrip("\n"))
+            elif self.in_special_lines:
+                self.json_lines.append(self.cur_line)
+            elif not self.cur_printed:
+                self.explanation += self.cur_line
+                if self.cur_line:
+                    self.explained_since_change = True
 
-                if not self.cur_printed and (
-                    self.in_code_lines or not self.in_special_lines
-                ):
-                    # Lets us print lines that start with @@start
-                    to_print = self.cur_line
+            if not self.cur_printed and (
+                self.in_code_lines or not self.in_special_lines
+            ):
+                # Lets us print lines that start with @@start
+                to_print = self.cur_line
 
         self.cur_line = ""
         self.cur_printed = False
