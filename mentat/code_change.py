@@ -58,7 +58,8 @@ class CodeChange:
             self.lexer.ensurenl = False
         except ClassNotFound:
             self.lexer = TextLexer()
-
+        
+        
         if(self.action == CodeChangeAction.Insert):
             if "insert-before-line" in self.json_data:
                 self.first_changed_line = self.json_data["insert-before-line"]
@@ -78,15 +79,15 @@ class CodeChange:
                 )
             self.first_changed_line -= 0.5
             self.last_changed_line = self.first_changed_line
-        if(self.action == CodeChangeAction.Replace):
+        elif(self.action == CodeChangeAction.Replace):
             self.first_changed_line = self.json_data["start-line"]
             self.last_changed_line = self.json_data["end-line"]
-        if(self.action == CodeChangeAction.Delete):
+        elif(self.action == CodeChangeAction.Delete):
             self.first_changed_line = self.json_data["start-line"]
             self.last_changed_line = self.json_data["end-line"]
-        if(self.action == CodeChangeAction.CreateFile):
+        elif(self.action == CodeChangeAction.CreateFile):
             pass
-        if(self.action == CodeChangeAction.DeleteFile):
+        elif(self.action == CodeChangeAction.DeleteFile):
             pass
         else:
             raise Exception(f"Unknown action {self.action}")

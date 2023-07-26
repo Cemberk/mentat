@@ -114,7 +114,7 @@ def get_user_feedback_on_changes(
     user_response = user_input_manager.collect_user_input()
 
     need_user_request = True
-    if(user_response.lower() == "y" | user_response.lower() == ""):
+    if((user_response.lower() == "y") | (user_response.lower() == "")):
         code_changes_to_apply = code_changes
         conv.add_user_message("User chose to apply all your changes.")
     elif(user_response.lower() == "n"):
