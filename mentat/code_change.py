@@ -106,28 +106,23 @@ class CodeChange:
         return self.last_changed_line < other.last_changed_line
 
     def apply(self, cur_file_lines: list[str]) -> list[str]:
-        match self.action:
-            case CodeChangeAction.Insert:
-                previous_lines = cur_file_lines[: int(self.first_changed_line)]
-                following_lines = cur_file_lines[int(self.first_changed_line) :]
-                new_file_lines = previous_lines + self.code_lines + following_lines
-
-            case CodeChangeAction.Replace:
-                previous_lines = cur_file_lines[: self.first_changed_line - 1]
-                following_lines = cur_file_lines[self.last_changed_line :]
-                new_file_lines = previous_lines + self.code_lines + following_lines
-
-            case CodeChangeAction.Delete:
-                previous_lines = cur_file_lines[: self.first_changed_line - 1]
-                following_lines = cur_file_lines[self.last_changed_line :]
-                new_file_lines = previous_lines + following_lines
-
-            case CodeChangeAction.CreateFile | CodeChangeAction.DeleteFile:
-                raise Exception(
-                    f"CodeChange with action={self.action} shouldn't have apply called"
-                )
-
-            case _:
-                raise Exception(f"Unknown action {self.action.value}")
+        if(self.action == CodeChangeAction.Insert):
+            previous_lines = cur_file_lines[: int(self.first_changed_line)]
+            following_lines = cur_file_lines[int(self.first_changed_line) :]
+            new_file_lines = previous_lines + self.code_lines + following_lines
+        elif(self.action == CodeChangeAction.Replace):
+            previous_lines = cur_file_lines[: self.first_changed_line - 1]
+            following_lines = cur_file_lines[self.last_changed_line :]
+            new_file_lines = previous_lines + self.code_lines + following_lines
+        elif(self.action == CodeChangeAction.Delete):
+            previous_lines = cur_file_lines[: self.first_changed_line - 1]
+            following_lines = cur_file_lines[self.last_changed_line :]
+            new_file_lines = previous_lines + following_lines
+        elif((self.action == CodeChangeAction.CreateFile) | (self.action == CodeChangeAction.DeleteFile)):
+            raise Exception(
+                f"CodeChange with action={self.action} shouldn't have apply called"
+            )
+        else:
+            raise Exception(f"Unknown action {self.action.value}")
 
         return new_file_lines
