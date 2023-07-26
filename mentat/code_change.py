@@ -59,43 +59,37 @@ class CodeChange:
         except ClassNotFound:
             self.lexer = TextLexer()
 
-        match self.action:
-            case CodeChangeAction.Insert:
-                if "insert-before-line" in self.json_data:
-                    self.first_changed_line = self.json_data["insert-before-line"]
-                    if "insert-after-line" in self.json_data:
-                        assert (
-                            self.first_changed_line - 1
-                            == self.json_data["insert-after-line"]
-                        ), (
-                            "insert-before-line and insert-after-line are not"
-                            " consecutive"
-                        )
-                elif "insert-after-line" in self.json_data:
-                    self.first_changed_line = self.json_data["insert-after-line"] + 1
-                else:
-                    raise Exception(
-                        "insert-before-line or insert-after-line must be specified"
+        if(self.action == CodeChangeAction.Insert):
+            if "insert-before-line" in self.json_data:
+                self.first_changed_line = self.json_data["insert-before-line"]
+                if "insert-after-line" in self.json_data:
+                    assert (
+                        self.first_changed_line - 1
+                        == self.json_data["insert-after-line"]
+                    ), (
+                        "insert-before-line and insert-after-line are not"
+                        " consecutive"
                     )
-                self.first_changed_line -= 0.5
-                self.last_changed_line = self.first_changed_line
-
-            case CodeChangeAction.Replace:
-                self.first_changed_line = self.json_data["start-line"]
-                self.last_changed_line = self.json_data["end-line"]
-
-            case CodeChangeAction.Delete:
-                self.first_changed_line = self.json_data["start-line"]
-                self.last_changed_line = self.json_data["end-line"]
-
-            case CodeChangeAction.CreateFile:
-                pass
-
-            case CodeChangeAction.DeleteFile:
-                pass
-
-            case _:
-                raise Exception(f"Unknown action {self.action}")
+            elif "insert-after-line" in self.json_data:
+                self.first_changed_line = self.json_data["insert-after-line"] + 1
+            else:
+                raise Exception(
+                    "insert-before-line or insert-after-line must be specified"
+                )
+            self.first_changed_line -= 0.5
+            self.last_changed_line = self.first_changed_line
+        if(self.action == CodeChangeAction.Replace):
+            self.first_changed_line = self.json_data["start-line"]
+            self.last_changed_line = self.json_data["end-line"]
+        if(self.action == CodeChangeAction.Delete):
+            self.first_changed_line = self.json_data["start-line"]
+            self.last_changed_line = self.json_data["end-line"]
+        if(self.action == CodeChangeAction.CreateFile):
+            pass
+        if(self.action == CodeChangeAction.DeleteFile):
+            pass
+        else:
+            raise Exception(f"Unknown action {self.action}")
 
         if self.action.has_file():
             file_path = os.path.join(self.git_root, self.file)
