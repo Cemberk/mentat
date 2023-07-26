@@ -114,31 +114,30 @@ def get_user_feedback_on_changes(
     user_response = user_input_manager.collect_user_input()
 
     need_user_request = True
-    match user_response.lower():
-        case "y" | "":
-            code_changes_to_apply = code_changes
-            conv.add_user_message("User chose to apply all your changes.")
-        case "n":
-            code_changes_to_apply = []
-            conv.add_user_message("User chose not to apply any of your changes.")
-        case "i":
-            code_changes_to_apply, indices = user_filter_changes(
-                user_input_manager, code_changes
-            )
-            conv.add_user_message(
-                "User chose to apply"
-                f" {len(code_changes_to_apply)}/{len(code_changes)} of your suggest"
-                " changes. The changes they applied were:"
-                f" {', '.join(map(str, indices))}"
-            )
-        case _:
-            need_user_request = False
-            code_changes_to_apply = []
-            conv.add_user_message(
-                "User chose not to apply any of your changes. User response:"
-                f" {user_response}\n\nPlease adjust your previous plan and changes to"
-                " reflect this. Respond with a full new set of changes."
-            )
+    if(user_response.lower() == "y" | user_response.lower() == ""):
+        code_changes_to_apply = code_changes
+        conv.add_user_message("User chose to apply all your changes.")
+    elif(user_response.lower() == "n"):
+        code_changes_to_apply = []
+        conv.add_user_message("User chose not to apply any of your changes.")
+    elif(user_response.lower() == "i"):
+        code_changes_to_apply, indices = user_filter_changes(
+            user_input_manager, code_changes
+        )
+        conv.add_user_message(
+            "User chose to apply"
+            f" {len(code_changes_to_apply)}/{len(code_changes)} of your suggest"
+            " changes. The changes they applied were:"
+            f" {', '.join(map(str, indices))}"
+        )
+    else:
+        need_user_request = False
+        code_changes_to_apply = []
+        conv.add_user_message(
+            "User chose not to apply any of your changes. User response:"
+            f" {user_response}\n\nPlease adjust your previous plan and changes to"
+            " reflect this. Respond with a full new set of changes."
+        )
 
     if code_changes_to_apply:
         code_file_manager.write_changes_to_files(code_changes_to_apply)
